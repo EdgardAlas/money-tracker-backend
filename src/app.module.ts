@@ -1,14 +1,18 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { HealthModule } from './features/health/health.module';
 import { ConfigModule } from '@nestjs/config';
-import { envs } from 'src/env/envs';
+import { JwtModule } from '@nestjs/jwt';
 import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
+import { envs } from 'src/env/envs';
+import { HealthModule } from './features/health/health.module';
 
 @Module({
 	imports: [
 		HealthModule,
 		ConfigModule.forRoot({
 			load: [envs],
+		}),
+		JwtModule.register({
+			global: true,
 		}),
 	],
 	controllers: [],

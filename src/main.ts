@@ -20,6 +20,10 @@ async function bootstrap() {
 
 	logger.log('CORS enabled for origins:', process.env.CORS_ORIGINS);
 
+	const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+	logger.log(`Server timezone: ${timezone}`);
+
 	const PORT = process.env.PORT ?? 3000;
 
 	await app.listen(PORT);
