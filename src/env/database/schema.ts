@@ -35,6 +35,7 @@ export const transactionType = pgEnum('transaction_type', [
 	'income',
 	'expense',
 ]);
+export const userRole = pgEnum('user_role', ['user', 'admin', 'superadmin']);
 
 export const tiers = pgTable(
 	'tiers',
@@ -50,7 +51,7 @@ export const tiers = pgTable(
 		maxRecurringTransactions: integer('max_recurring_transactions').notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [unique('tiers_name_key').on(table.name)],
@@ -71,8 +72,9 @@ export const users = pgTable(
 		timezone: text().default('UTC').notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
+		role: userRole().default('user').notNull(),
 	},
 	(table) => [
 		index('idx_users_email').using(
@@ -99,18 +101,18 @@ export const tokens = pgTable(
 			.default(sql`uuid_generate_v7()`)
 			.primaryKey()
 			.notNull(),
-		userId: uuid('user_id'),
+		userId: uuid('user_id').notNull(),
 		token: text().notNull(),
 		refreshToken: text('refresh_token'),
 		jti: uuid().notNull(),
 		type: tokenType().notNull(),
 		expiresAt: timestamp('expires_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
@@ -134,7 +136,7 @@ export const accounts = pgTable(
 		type: accountType(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
@@ -195,7 +197,7 @@ export const icons = pgTable(
 		url: text().notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [unique('icons_name_key').on(table.name)],
@@ -214,7 +216,7 @@ export const budgets = pgTable(
 		period: budgetPeriod().notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
@@ -252,10 +254,10 @@ export const goals = pgTable(
 			precision: 12,
 			scale: 2,
 		}).notNull(),
-		dueDate: timestamp('due_date', { withTimezone: true, mode: 'string' }),
+		dueDate: timestamp('due_date', { withTimezone: true, mode: 'date' }),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
@@ -284,11 +286,11 @@ export const transactions = pgTable(
 		goalId: uuid('goal_id'),
 		amount: numeric({ precision: 12, scale: 2 }).notNull(),
 		type: transactionType().notNull(),
-		date: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+		date: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
 		note: text(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
@@ -350,13 +352,13 @@ export const recurringTransactions = pgTable(
 		recurrenceInterval: interval('recurrence_interval').notNull(),
 		nextOccurrence: timestamp('next_occurrence', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).notNull(),
 		note: text(),
 		isActive: boolean('is_active').default(true),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
-			mode: 'string',
+			mode: 'date',
 		}).defaultNow(),
 	},
 	(table) => [
