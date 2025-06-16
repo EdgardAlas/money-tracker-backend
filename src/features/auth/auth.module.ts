@@ -9,6 +9,7 @@ import { DatabaseModule } from 'src/env/database/database.module';
 import { ProfileService } from './services/profile.service';
 import { LogoutService } from './services/logout.service';
 import { RefreshService } from './services/refresh.service';
+import { RegisterService } from './services/register.service';
 
 @Module({
 	imports: [EnvModule, DatabaseModule],
@@ -20,6 +21,7 @@ import { RefreshService } from './services/refresh.service';
 		ProfileService,
 		LogoutService,
 		RefreshService,
+		RegisterService,
 	],
 	controllers: [AuthController],
 })

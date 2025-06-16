@@ -12,8 +12,9 @@ import {
 	interval,
 	boolean,
 	pgEnum,
+	AnyPgColumn,
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { SQL, sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 
 export const accountType = pgEnum('account_type', [
@@ -46,6 +47,7 @@ export const tiers = pgTable(
 		name: text().notNull(),
 		maxBudgets: integer('max_budgets').notNull(),
 		maxAccounts: integer('max_accounts').notNull(),
+		isDefault: boolean('is_default').default(false).notNull(),
 		maxGoals: integer('max_goals').notNull(),
 		maxRecurringTransactions: integer('max_recurring_transactions').notNull(),
 		createdAt: timestamp('created_at', {
@@ -500,3 +502,7 @@ export const recurringTransactionsRelations = relations(
 		}),
 	}),
 );
+
+export function lower(email: AnyPgColumn): SQL {
+	return sql`lower(${email})`;
+}
