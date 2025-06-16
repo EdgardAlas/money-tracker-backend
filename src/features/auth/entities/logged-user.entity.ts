@@ -13,6 +13,13 @@ export class LoggedUserEntity {
 	public role: Role;
 	public jti: string;
 
+	public tier: {
+		maxBudgets: number;
+		maxAccounts: number;
+		maxGoals: number;
+		maxRecurringTransactions: number;
+	};
+
 	constructor(props: LoggedUserEntity) {
 		Object.assign(this, props);
 	}

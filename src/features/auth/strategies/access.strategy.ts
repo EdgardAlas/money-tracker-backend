@@ -8,7 +8,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { and, eq } from 'drizzle-orm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { DatabaseService } from 'src/env/database/database.provider';
-import { tokens, users } from 'src/env/database/schema';
+import { tiers, tokens, users } from 'src/env/database/schema';
 
 import { EnvService } from 'src/env/services/env.service';
 import {
@@ -46,9 +46,16 @@ export class AccessStrategy extends PassportStrategy(
 				email: users.email,
 				name: users.name,
 				role: users.role,
+				tier: {
+					maxBudgets: tiers.maxBudgets,
+					maxAccounts: tiers.maxAccounts,
+					maxGoals: tiers.maxGoals,
+					maxRecurringTransactions: tiers.maxRecurringTransactions,
+				},
 			})
 			.from(users)
 			.innerJoin(tokens, eq(tokens.userId, users.id))
+			.innerJoin(tiers, eq(tiers.id, users.tierId))
 			.where(and(eq(users.id, sub), eq(tokens.accessJti, jti)));
 
 		if (!user) {
@@ -64,6 +71,7 @@ export class AccessStrategy extends PassportStrategy(
 			name: user.name || '',
 			role: user.role.toString() as Role,
 			jti,
+			tier: user.tier,
 		});
 	}
 }
