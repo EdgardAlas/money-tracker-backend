@@ -30,7 +30,6 @@ export const recurringTransactionType = pgEnum('recurring_transaction_type', [
 	'income',
 	'expense',
 ]);
-export const tokenType = pgEnum('token_type', ['access', 'refresh']);
 export const transactionType = pgEnum('transaction_type', [
 	'income',
 	'expense',
@@ -102,10 +101,8 @@ export const tokens = pgTable(
 			.primaryKey()
 			.notNull(),
 		userId: uuid('user_id').notNull(),
-		token: text().notNull(),
-		refreshToken: text('refresh_token'),
-		jti: uuid().notNull(),
-		type: tokenType().notNull(),
+		accessJti: uuid('access_jti').notNull(),
+		refreshJti: uuid('refresh_jti').notNull(),
 		expiresAt: timestamp('expires_at', {
 			withTimezone: true,
 			mode: 'date',

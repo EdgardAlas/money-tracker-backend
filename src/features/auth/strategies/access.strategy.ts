@@ -49,9 +49,7 @@ export class AccessStrategy extends PassportStrategy(
 			})
 			.from(users)
 			.innerJoin(tokens, eq(tokens.userId, users.id))
-			.where(
-				and(eq(users.id, sub), eq(tokens.jti, jti), eq(tokens.type, 'access')),
-			);
+			.where(and(eq(users.id, sub), eq(tokens.accessJti, jti)));
 
 		if (!user) {
 			this.logger.warn(

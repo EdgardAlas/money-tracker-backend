@@ -36,13 +36,7 @@ export class RefreshStrategy extends PassportStrategy(
 		const [refreshToken] = await this.databaseService
 			.select()
 			.from(tokens)
-			.where(
-				and(
-					eq(tokens.userId, sub),
-					eq(tokens.jti, jti),
-					eq(tokens.type, 'refresh'),
-				),
-			);
+			.where(and(eq(tokens.userId, sub), eq(tokens.refreshJti, jti)));
 
 		if (!refreshToken) {
 			this.logger.warn(`⚠️ Refresh token not found: ${jti}`);
@@ -52,7 +46,7 @@ export class RefreshStrategy extends PassportStrategy(
 		return new RefreshTokenEntity(
 			refreshToken.id,
 			refreshToken.userId,
-			refreshToken.jti,
+			refreshToken.refreshJti,
 			refreshToken.expiresAt,
 		);
 	}

@@ -25,7 +25,7 @@ export const DatabaseProvider: Provider = {
 		return drizzle({
 			client: pool,
 			schema,
-			// logger: true,
+			logger: true,
 		});
 	},
 };
