@@ -21,37 +21,54 @@ export class LoginService implements BaseService<LoginResponseDto> {
 	async execute(body: LoginRequestDto) {
 		this.logger.log(`Executing login for user: ${body.email}`);
 
-		const [user] = await this.databaseService
-			.select()
-			.from(users)
-			.where(eq(users.email, body.email));
+		const user = await this.findUserByEmail(body.email);
 
-		if (!user) {
-			this.logger.warn(`User not found: ${body.email}`);
-			throw new NotFoundException('Invalid credentials');
-		}
-
-		const isPasswordValid = await compare(body.password, user.password);
-
-		if (!isPasswordValid) {
-			this.logger.warn(`Invalid password for user: ${body.email}`);
-			throw new NotFoundException('Invalid credentials');
-		}
+		await this.validatePassword(body.password, user.password, body.email);
 
 		this.logger.log(`User authenticated successfully: ${body.email}`);
 
-		const accessTokenJti = v7();
-		const refreshTokenJti = v7();
-
-		const { accessToken, refreshToken } = await this.tokensService.insert(
-			user.id,
-			accessTokenJti,
-			refreshTokenJti,
-		);
+		const { accessToken, refreshToken } = await this.generateTokens(user.id);
 
 		return new LoginResponseDto({
 			accessToken,
 			refreshToken,
 		});
+	}
+
+	private async findUserByEmail(email: string) {
+		const [user] = await this.databaseService
+			.select({
+				id: users.id,
+				password: users.password,
+				email: users.email,
+			})
+			.from(users)
+			.where(eq(users.email, email));
+
+		if (!user) {
+			this.logger.warn(`User not found: ${email}`);
+			throw new NotFoundException('Invalid credentials');
+		}
+		return user;
+	}
+
+	private async validatePassword(
+		providedPassword: string,
+		storedPassword: string,
+		email: string,
+	) {
+		const isPasswordValid = await compare(providedPassword, storedPassword);
+
+		if (!isPasswordValid) {
+			this.logger.warn(`Invalid password for user: ${email}`);
+			throw new NotFoundException('Invalid credentials');
+		}
+	}
+
+	private async generateTokens(userId: string) {
+		const accessTokenJti = v7();
+		const refreshTokenJti = v7();
+
+		return this.tokensService.insert(userId, accessTokenJti, refreshTokenJti);
 	}
 }
