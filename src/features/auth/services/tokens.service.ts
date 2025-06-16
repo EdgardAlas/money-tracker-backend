@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { eq } from 'drizzle-orm';
+import { eq, lt } from 'drizzle-orm';
 import { DatabaseService } from 'src/env/database/database.provider';
 import { tokens } from 'src/env/database/schema';
 import { EnvService } from 'src/env/services/env.service';
@@ -109,5 +109,23 @@ export class TokensService {
 				expiresAt: formatDate().add(refreshDays, 'days').toDate(),
 			})
 			.where(eq(tokens.id, id));
+	}
+
+	deleteByAccessJti(accessJti: string) {
+		this.logger.log(`Deleting token with access JTI: ${accessJti}`);
+		return this.databaseService
+			.delete(tokens)
+			.where(eq(tokens.accessJti, accessJti));
+	}
+
+	deleteExpiredTokens() {
+		const refreshDays = this.getRefreshTokenExpirationDays();
+		const deleteBeforeDate = formatDate()
+			.subtract(refreshDays, 'days')
+			.toDate();
+
+		return this.databaseService
+			.delete(tokens)
+			.where(lt(tokens.expiresAt, deleteBeforeDate));
 	}
 }

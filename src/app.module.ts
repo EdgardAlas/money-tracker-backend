@@ -5,10 +5,12 @@ import { LoggerMiddleware } from 'src/common/middlewares/logger.middleware';
 import { envs } from 'src/env/envs';
 import { HealthModule } from './features/health/health.module';
 import { AuthModule } from './features/auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
 	imports: [
 		HealthModule,
+		ScheduleModule.forRoot(),
 		ConfigModule.forRoot({
 			load: [envs],
 		}),
