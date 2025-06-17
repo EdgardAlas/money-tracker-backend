@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { ROLES_DECORATOR_NAME } from 'src/common/decorators/permissions.decorator';
+import { ROLES_DECORATOR_NAME } from 'src/common/decorators/roles.decorator';
 import {
 	LoggedUserEntity,
 	UserRoles,
