@@ -8,8 +8,8 @@ import { hash } from 'bcryptjs';
 import { eq, sql } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
-import { DatabaseService } from 'src/env/database/database.provider';
-import { lower, tiers, users } from 'src/env/database/schema';
+import { DatabaseService } from 'src/database/database.provider';
+import { lower, tiers, users } from 'src/database/schema';
 import { RegisterRequestDto } from 'src/features/auth/dto/requests/register.request.dto';
 
 @Injectable()

@@ -7,8 +7,8 @@ import {
 import { PassportStrategy } from '@nestjs/passport';
 import { and, eq } from 'drizzle-orm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { DatabaseService } from 'src/env/database/database.provider';
-import { tokens } from 'src/env/database/schema';
+import { DatabaseService } from 'src/database/database.provider';
+import { tokens } from 'src/database/schema';
 
 import { EnvService } from 'src/env/services/env.service';
 import { RefreshTokenEntity } from 'src/features/auth/entities/refresh-token.entity';

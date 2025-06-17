@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { eq, lt } from 'drizzle-orm';
-import { DatabaseService } from 'src/env/database/database.provider';
-import { tokens } from 'src/env/database/schema';
+import { DatabaseService } from 'src/database/database.provider';
+import { tokens } from 'src/database/schema';
 import { EnvService } from 'src/env/services/env.service';
 import { TokensEntity } from 'src/features/auth/entities/tokens.entity';
 import { formatDate } from 'src/lib/format-dates';

@@ -5,11 +5,11 @@ import { AuthController } from './auth.controller';
 import { LoginService } from 'src/features/auth/services/login.service';
 import { TokensService } from './services/tokens.service';
 import { EnvModule } from 'src/env/env.module';
-import { DatabaseModule } from 'src/env/database/database.module';
 import { ProfileService } from './services/profile.service';
 import { LogoutService } from './services/logout.service';
 import { RefreshService } from './services/refresh.service';
 import { RegisterService } from './services/register.service';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
 	imports: [EnvModule, DatabaseModule],

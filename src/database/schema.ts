@@ -31,6 +31,8 @@ export const recurringTransactionType = pgEnum('recurring_transaction_type', [
 	'income',
 	'expense',
 ]);
+export const role = pgEnum('role', ['user', 'admin', 'superadmin']);
+export const tokenType = pgEnum('token_type', ['access', 'refresh']);
 export const transactionType = pgEnum('transaction_type', [
 	'income',
 	'expense',
@@ -47,9 +49,9 @@ export const tiers = pgTable(
 		name: text().notNull(),
 		maxBudgets: integer('max_budgets').notNull(),
 		maxAccounts: integer('max_accounts').notNull(),
-		isDefault: boolean('is_default').default(false).notNull(),
 		maxGoals: integer('max_goals').notNull(),
 		maxRecurringTransactions: integer('max_recurring_transactions').notNull(),
+		isDefault: boolean('is_default').default(false),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
 			mode: 'date',
@@ -67,15 +69,15 @@ export const users = pgTable(
 			.notNull(),
 		email: text().notNull(),
 		password: text().notNull(),
-		name: text(),
-		tierId: uuid('tier_id'),
+		name: text().notNull(),
+		tierId: uuid('tier_id').notNull(),
 		currency: char({ length: 3 }).default('USD').notNull(),
 		timezone: text().default('UTC').notNull(),
+		role: role().default('user').notNull(),
 		createdAt: timestamp('created_at', {
 			withTimezone: true,
 			mode: 'date',
 		}).defaultNow(),
-		role: userRole().default('user').notNull(),
 	},
 	(table) => [
 		index('idx_users_email').using(
@@ -90,7 +92,7 @@ export const users = pgTable(
 			columns: [table.tierId],
 			foreignColumns: [tiers.id],
 			name: 'users_tier_id_fkey',
-		}).onDelete('set null'),
+		}),
 		unique('users_email_key').on(table.email),
 	],
 );
@@ -119,7 +121,7 @@ export const tokens = pgTable(
 			columns: [table.userId],
 			foreignColumns: [users.id],
 			name: 'tokens_user_id_fkey',
-		}).onDelete('cascade'),
+		}),
 	],
 );
 
