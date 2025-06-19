@@ -17,6 +17,7 @@ import { CreateAccountService } from './servicesa/create-account.service';
 import { DeleteAccountService } from './servicesa/delete-account.service';
 import { GetAccountService } from './servicesa/get-account.service';
 import { UpdateAccountService } from './servicesa/update-account.service';
+import { LoggedUserEntity } from 'src/features/auth/entities/logged-user.entity';
 
 @Controller('accounts')
 @Auth()
@@ -39,9 +40,9 @@ export class AccountsController {
 	@Post()
 	async createAccount(
 		@Body() body: CreateAccountRequestDto,
-		@GetUser('id') userId: string,
+		@GetUser() user: LoggedUserEntity,
 	) {
-		return this.createAccountService.execute(body, userId);
+		return this.createAccountService.execute(body, user);
 	}
 
 	@Patch(':id')

@@ -8,7 +8,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { and, eq } from 'drizzle-orm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { DatabaseService } from 'src/database/database.provider';
-import { tiers, tokens, users } from 'src/database/schema';
+import {
+	accounts,
+	budgets,
+	goals,
+	recurringTransactions,
+	tiers,
+	tokens,
+	users,
+} from 'src/database/schema';
 
 import { EnvService } from 'src/env/services/env.service';
 import {
@@ -52,11 +60,31 @@ export class AccessStrategy extends PassportStrategy(
 					maxGoals: tiers.maxGoals,
 					maxRecurringTransactions: tiers.maxRecurringTransactions,
 				},
+				totalAccounts: this.databaseService.$count(
+					accounts,
+					eq(accounts.userId, users.id),
+				),
+				totalBudgets: this.databaseService.$count(
+					budgets,
+					eq(budgets.userId, users.id),
+				),
+				totalGoals: this.databaseService.$count(
+					goals,
+					eq(goals.userId, users.id),
+				),
+				recurringTransactions: this.databaseService.$count(
+					recurringTransactions,
+					eq(recurringTransactions.userId, users.id),
+				),
 			})
 			.from(users)
 			.innerJoin(tokens, eq(tokens.userId, users.id))
 			.innerJoin(tiers, eq(tiers.id, users.tierId))
 			.where(and(eq(users.id, sub), eq(tokens.accessJti, jti)));
+
+		this.logger.debug(
+			`User found: ${user ? JSON.stringify(user) : 'No user found'}`,
+		);
 
 		if (!user) {
 			this.logger.warn(
@@ -72,6 +100,12 @@ export class AccessStrategy extends PassportStrategy(
 			role: user.role.toString() as Role,
 			jti,
 			tier: user.tier,
+			system: {
+				totalAccounts: user.totalAccounts,
+				totalBudgets: user.totalBudgets,
+				totalGoals: user.totalGoals,
+				recurringTransactions: user.recurringTransactions,
+			},
 		});
 	}
 }

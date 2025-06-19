@@ -1,3 +1,4 @@
+import { Trim } from '@buka/class-transformer-extra';
 import {
 	IsEmail,
 	IsOptional,
@@ -10,20 +11,24 @@ import { Match } from 'src/common/validators/match';
 
 export class RegisterRequestDto {
 	@IsString()
+	@Trim()
 	@IsEmail()
 	email: string;
 
 	@IsString()
+	@Trim()
 	@MinLength(6)
 	@MaxLength(32)
 	password: string;
 
 	@IsString()
+	@Trim()
 	@MinLength(2)
 	@MaxLength(32)
 	name: string;
 
 	@IsString()
+	@Trim()
 	@MinLength(2)
 	@MaxLength(32)
 	@Match('password', {
@@ -32,6 +37,7 @@ export class RegisterRequestDto {
 	confirmPassword: string;
 
 	@IsString()
+	@Trim()
 	@IsOptional()
 	@IsTimeZone()
 	timezone: string = 'UTC';

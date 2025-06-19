@@ -20,6 +20,13 @@ export class LoggedUserEntity {
 		maxRecurringTransactions: number;
 	};
 
+	public system: {
+		totalAccounts: number;
+		totalBudgets: number;
+		totalGoals: number;
+		recurringTransactions: number;
+	};
+
 	constructor(props: LoggedUserEntity) {
 		Object.assign(this, props);
 	}

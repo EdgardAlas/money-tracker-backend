@@ -5,7 +5,7 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, not } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
@@ -25,21 +25,8 @@ export class UpdateAccountService implements BaseService<IdResponseDto> {
 		body: UpdateAccountRequestDto,
 		userId: string,
 	) {
-		const [accountExists] = await this.databaseService
-			.select({
-				id: accounts.id,
-			})
-			.from(accounts)
-			.where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
-
-		if (!accountExists) {
-			this.logger.warn(
-				`User with ID ${userId} attempted to update account with ID ${accountId}, but it does not exist or they do not have permission.`,
-			);
-			throw new NotFoundException(
-				`Account not found or you do not have permission to update it.`,
-			);
-		}
+		await this.ensureAccountExists(accountId, userId);
+		await this.ensureNameIsUnique(body.name, accountId, userId);
 
 		const [accountUpdated] = await this.databaseService
 			.update(accounts)
@@ -62,5 +49,53 @@ export class UpdateAccountService implements BaseService<IdResponseDto> {
 		}
 
 		return new IdResponseDto(accountUpdated.id);
+	}
+
+	private async ensureAccountExists(accountId: string, userId: string) {
+		const [accountExists] = await this.databaseService
+			.select({
+				id: accounts.id,
+			})
+			.from(accounts)
+			.where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
+
+		if (!accountExists) {
+			this.logger.warn(
+				`User with ID ${userId} attempted to update account with ID ${accountId}, but it does not exist or they do not have permission.`,
+			);
+			throw new NotFoundException(
+				`Account not found or you do not have permission to update it.`,
+			);
+		}
+	}
+
+	private async ensureNameIsUnique(
+		name: string | undefined,
+		accountId: string,
+		userId: string,
+	) {
+		if (!name) return;
+
+		const [nameExists] = await this.databaseService
+			.select({
+				id: accounts.id,
+			})
+			.from(accounts)
+			.where(
+				and(
+					eq(accounts.userId, userId),
+					eq(accounts.name, name),
+					not(eq(accounts.id, accountId)),
+				),
+			);
+
+		if (nameExists) {
+			this.logger.warn(
+				`User with ID ${userId} attempted to update account with ID ${accountId} to a name (${name}) that already exists.`,
+			);
+			throw new InternalServerErrorException(
+				'An account with this name already exists for this user.',
+			);
+		}
 	}
 }
