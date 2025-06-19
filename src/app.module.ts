@@ -6,6 +6,7 @@ import { envs } from 'src/env/envs';
 import { HealthModule } from './features/health/health.module';
 import { AuthModule } from './features/auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AccountsModule } from './features/accounts/accounts.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 			global: true,
 		}),
 		AuthModule,
+		AccountsModule,
 	],
 	controllers: [],
 	providers: [],

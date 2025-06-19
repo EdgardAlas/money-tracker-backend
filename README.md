@@ -1,4 +1,4 @@
-# Personal Finance SaaS – Backend
+# Personal Finance SaaS – Backend [Work In Progress]
 
 This repository contains the backend for a multi-tenant personal finance SaaS platform. It provides features such as user authentication, account and transaction management (including recurring transactions), budgeting by category, savings goals, and tier-based usage limits.
 
