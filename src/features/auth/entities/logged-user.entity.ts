@@ -18,6 +18,7 @@ export class LoggedUserEntity {
 		maxAccounts: number;
 		maxGoals: number;
 		maxRecurringTransactions: number;
+		maxCategories: number;
 	};
 
 	public system: {
@@ -25,6 +26,7 @@ export class LoggedUserEntity {
 		totalBudgets: number;
 		totalGoals: number;
 		recurringTransactions: number;
+		totalCategories: number;
 	};
 
 	constructor(props: LoggedUserEntity) {

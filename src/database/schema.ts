@@ -51,6 +51,7 @@ export const tiers = pgTable(
 		maxBudgets: integer('max_budgets').notNull(),
 		maxAccounts: integer('max_accounts').notNull(),
 		maxGoals: integer('max_goals').notNull(),
+		maxCategories: integer('max_categories').notNull(),
 		maxRecurringTransactions: integer('max_recurring_transactions').notNull(),
 		isDefault: boolean('is_default').default(false),
 		createdAt: timestamp('created_at', {

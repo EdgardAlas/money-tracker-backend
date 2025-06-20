@@ -5,12 +5,13 @@ import {
 	Logger,
 } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { DatabaseService } from 'src/database/database.provider';
 import {
 	accounts,
 	budgets,
+	categories,
 	goals,
 	recurringTransactions,
 	tiers,
@@ -68,12 +69,7 @@ export class AccessStrategy extends PassportStrategy(
 			role: user.role.toString() as Role,
 			jti,
 			tier: user.tier,
-			system: {
-				totalAccounts: user.totalAccounts,
-				totalBudgets: user.totalBudgets,
-				totalGoals: user.totalGoals,
-				recurringTransactions: user.recurringTransactions,
-			},
+			system: user.system,
 		});
 	}
 
@@ -89,20 +85,27 @@ export class AccessStrategy extends PassportStrategy(
 					maxAccounts: tiers.maxAccounts,
 					maxGoals: tiers.maxGoals,
 					maxRecurringTransactions: tiers.maxRecurringTransactions,
+					maxCategories: tiers.maxCategories,
 				},
-				totalAccounts: this.databaseService.$count(
-					accounts,
-					eq(accounts.userId, sub),
-				),
-				totalBudgets: this.databaseService.$count(
-					budgets,
-					eq(budgets.userId, sub),
-				),
-				totalGoals: this.databaseService.$count(goals, eq(goals.userId, sub)),
-				recurringTransactions: this.databaseService.$count(
-					recurringTransactions,
-					eq(recurringTransactions.userId, sub),
-				),
+				system: {
+					totalAccounts: this.databaseService.$count(
+						accounts,
+						eq(accounts.userId, sub),
+					),
+					totalBudgets: this.databaseService.$count(
+						budgets,
+						eq(budgets.userId, sub),
+					),
+					totalGoals: this.databaseService.$count(goals, eq(goals.userId, sub)),
+					totalCategories: this.databaseService.$count(
+						categories,
+						and(eq(categories.userId, sub), isNull(categories.userId)),
+					),
+					recurringTransactions: this.databaseService.$count(
+						recurringTransactions,
+						eq(recurringTransactions.userId, sub),
+					),
+				},
 			})
 			.from(users)
 			.innerJoin(tokens, eq(tokens.userId, users.id))
