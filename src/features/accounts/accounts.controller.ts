@@ -8,6 +8,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 } from '@nestjs/common';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { GetUser } from 'src/common/decorators/user.decorator';
@@ -18,6 +19,8 @@ import { DeleteAccountService } from './servicesa/delete-account.service';
 import { GetAccountService } from './servicesa/get-account.service';
 import { UpdateAccountService } from './servicesa/update-account.service';
 import { LoggedUserEntity } from 'src/features/auth/entities/logged-user.entity';
+import { GetAccountsService } from 'src/features/accounts/servicesa/get-accounts.service';
+import { PaginationRequestDto } from 'src/common/requests/pagination.request.dto';
 
 @Controller('accounts')
 @Auth()
@@ -27,7 +30,16 @@ export class AccountsController {
 		private readonly createAccountService: CreateAccountService,
 		private readonly updateAccountService: UpdateAccountService,
 		private readonly deleteAccountService: DeleteAccountService,
+		private readonly getAccountsService: GetAccountsService,
 	) {}
+
+	@Get()
+	async getAccounts(
+		@Query() query: PaginationRequestDto,
+		@GetUser('id') userId: string,
+	) {
+		return this.getAccountsService.execute(query, userId);
+	}
 
 	@Get(':id')
 	async getAccount(

@@ -5,6 +5,7 @@ import { CreateAccountService } from './servicesa/create-account.service';
 import { DeleteAccountService } from './servicesa/delete-account.service';
 import { GetAccountService } from './servicesa/get-account.service';
 import { UpdateAccountService } from './servicesa/update-account.service';
+import { GetAccountsService } from './servicesa/get-accounts.service';
 
 @Module({
 	imports: [DatabaseModule],
@@ -14,6 +15,7 @@ import { UpdateAccountService } from './servicesa/update-account.service';
 		UpdateAccountService,
 		DeleteAccountService,
 		GetAccountService,
+		GetAccountsService,
 	],
 })
 export class AccountsModule {}

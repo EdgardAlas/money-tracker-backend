@@ -13,6 +13,7 @@ import {
 	boolean,
 	pgEnum,
 	AnyPgColumn,
+	PgSelect,
 } from 'drizzle-orm/pg-core';
 import { SQL, sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
@@ -576,4 +577,12 @@ export const recurringTransactionsRelations = relations(
 
 export function lower(email: AnyPgColumn): SQL {
 	return sql`lower(${email})`;
+}
+
+export function withPagination<T extends PgSelect>(
+	qb: T,
+	page: number = 1,
+	pageSize: number = 10,
+) {
+	return qb.limit(pageSize).offset((page - 1) * pageSize);
 }
