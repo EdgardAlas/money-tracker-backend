@@ -9,7 +9,7 @@ import {
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { RefreshToken } from 'src/common/decorators/refresh-token.decorator';
 import { Refresh } from 'src/common/decorators/refresh.decorator';
-import { GetUser } from 'src/common/decorators/user.decorator';
+import { User } from 'src/common/decorators/user.decorator';
 import { LoginRequestDto } from './dto/requests/login.request.dto';
 import { RegisterRequestDto } from './dto/requests/register.request.dto';
 import { LoggedUserEntity } from './entities/logged-user.entity';
@@ -38,14 +38,14 @@ export class AuthController {
 
 	@Auth()
 	@Get('profile')
-	profile(@GetUser() user: LoggedUserEntity) {
+	profile(@User() user: LoggedUserEntity) {
 		return this.profileService.execute(user);
 	}
 
 	@Auth()
 	@Post('logout')
 	@HttpCode(HttpStatus.NO_CONTENT)
-	logout(@GetUser() user: LoggedUserEntity) {
+	logout(@User() user: LoggedUserEntity) {
 		return this.logoutService.execute(user);
 	}
 
