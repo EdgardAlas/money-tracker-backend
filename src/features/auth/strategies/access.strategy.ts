@@ -62,19 +62,16 @@ export class AccessStrategy extends PassportStrategy(
 				},
 				totalAccounts: this.databaseService.$count(
 					accounts,
-					eq(accounts.userId, users.id),
+					eq(accounts.userId, sub),
 				),
 				totalBudgets: this.databaseService.$count(
 					budgets,
-					eq(budgets.userId, users.id),
+					eq(budgets.userId, sub),
 				),
-				totalGoals: this.databaseService.$count(
-					goals,
-					eq(goals.userId, users.id),
-				),
+				totalGoals: this.databaseService.$count(goals, eq(goals.userId, sub)),
 				recurringTransactions: this.databaseService.$count(
 					recurringTransactions,
-					eq(recurringTransactions.userId, users.id),
+					eq(recurringTransactions.userId, sub),
 				),
 			})
 			.from(users)
