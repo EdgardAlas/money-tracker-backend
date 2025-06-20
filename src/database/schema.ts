@@ -57,7 +57,17 @@ export const tiers = pgTable(
 			mode: 'date',
 		}).defaultNow(),
 	},
-	(table) => [unique('tiers_name_key').on(table.name)],
+	(table) => [
+		index('idx_tiers_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
+		index('idx_tiers_name').using(
+			'btree',
+			table.name.asc().nullsLast().op('text_ops'),
+		),
+		unique('tiers_name_key').on(table.name),
+	],
 );
 
 export const users = pgTable(
@@ -80,13 +90,13 @@ export const users = pgTable(
 		}).defaultNow(),
 	},
 	(table) => [
+		index('idx_users_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
 		index('idx_users_email').using(
 			'btree',
 			table.email.asc().nullsLast().op('text_ops'),
-		),
-		index('idx_users_tier_id').using(
-			'btree',
-			table.tierId.asc().nullsLast().op('uuid_ops'),
 		),
 		foreignKey({
 			columns: [table.tierId],
@@ -117,6 +127,22 @@ export const tokens = pgTable(
 		}).defaultNow(),
 	},
 	(table) => [
+		index('idx_tokens_access_jti').using(
+			'btree',
+			table.accessJti.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_tokens_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
+		index('idx_tokens_refresh_jti').using(
+			'btree',
+			table.refreshJti.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_tokens_user_id').using(
+			'btree',
+			table.userId.asc().nullsLast().op('uuid_ops'),
+		),
 		foreignKey({
 			columns: [table.userId],
 			foreignColumns: [users.id],
@@ -141,6 +167,15 @@ export const accounts = pgTable(
 		}).defaultNow(),
 	},
 	(table) => [
+		index('idx_accounts_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
+		index('idx_accounts_name_user_id').using(
+			'btree',
+			table.name.asc().nullsLast().op('uuid_ops'),
+			table.userId.asc().nullsLast().op('text_ops'),
+		),
 		index('idx_accounts_user_id').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
@@ -163,11 +198,19 @@ export const categories = pgTable(
 		userId: uuid('user_id'),
 		name: text().notNull(),
 		icon: uuid(),
+		createdAt: timestamp('created_at', {
+			withTimezone: true,
+			mode: 'date',
+		}).defaultNow(),
 	},
 	(table) => [
+		index('idx_categories_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
 		index('idx_categories_name_user_id').using(
 			'btree',
-			table.name.asc().nullsLast().op('text_ops'),
+			table.name.asc().nullsLast().op('uuid_ops'),
 			table.userId.asc().nullsLast().op('text_ops'),
 		),
 		index('idx_categories_user_id').using(
@@ -201,7 +244,17 @@ export const icons = pgTable(
 			mode: 'date',
 		}).defaultNow(),
 	},
-	(table) => [unique('icons_name_key').on(table.name)],
+	(table) => [
+		index('idx_icons_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
+		index('idx_icons_name').using(
+			'btree',
+			table.name.asc().nullsLast().op('text_ops'),
+		),
+		unique('icons_name_key').on(table.name),
+	],
 );
 
 export const budgets = pgTable(
@@ -224,6 +277,10 @@ export const budgets = pgTable(
 		index('idx_budgets_category_id').using(
 			'btree',
 			table.categoryId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_budgets_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
 		),
 		index('idx_budgets_user_id').using(
 			'btree',
@@ -262,6 +319,10 @@ export const goals = pgTable(
 		}).defaultNow(),
 	},
 	(table) => [
+		index('idx_goals_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
+		),
 		index('idx_goals_user_id').using(
 			'btree',
 			table.userId.asc().nullsLast().op('uuid_ops'),
@@ -302,6 +363,10 @@ export const transactions = pgTable(
 		index('idx_transactions_category_id').using(
 			'btree',
 			table.categoryId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_transactions_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
 		),
 		index('idx_transactions_date').using(
 			'btree',
@@ -370,6 +435,10 @@ export const recurringTransactions = pgTable(
 		index('idx_recurring_transactions_category_id').using(
 			'btree',
 			table.categoryId.asc().nullsLast().op('uuid_ops'),
+		),
+		index('idx_recurring_transactions_created_at').using(
+			'btree',
+			table.createdAt.asc().nullsLast().op('timestamptz_ops'),
 		),
 		index('idx_recurring_transactions_next_occurrence').using(
 			'btree',
