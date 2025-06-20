@@ -26,7 +26,7 @@ export class UpdateAccountService implements BaseService<IdResponseDto> {
 		userId: string,
 	) {
 		await this.ensureAccountExists(accountId, userId);
-		await this.ensureNameIsUnique(body.name, accountId, userId);
+		await this.ensureAccountNameIsUnique(body.name, accountId, userId);
 
 		const [accountUpdated] = await this.databaseService
 			.update(accounts)
@@ -69,7 +69,7 @@ export class UpdateAccountService implements BaseService<IdResponseDto> {
 		}
 	}
 
-	private async ensureNameIsUnique(
+	private async ensureAccountNameIsUnique(
 		name: string | undefined,
 		accountId: string,
 		userId: string,
