@@ -48,6 +48,36 @@ export class AccessStrategy extends PassportStrategy(
 			`Validating access token for user ID: ${sub}, jti: ${jti}`,
 		);
 
+		const user = await this.findUserWithToken(sub, jti);
+
+		this.logger.debug(
+			`User found: ${user ? JSON.stringify(user) : 'No user found'}`,
+		);
+
+		if (!user) {
+			this.logger.warn(
+				`Access token validation failed for user ID: ${sub}, jti: ${jti}`,
+			);
+			throw new BadRequestException('The credentials provided are not valid.');
+		}
+
+		return new LoggedUserEntity({
+			id: user.id,
+			email: user.email,
+			name: user.name || '',
+			role: user.role.toString() as Role,
+			jti,
+			tier: user.tier,
+			system: {
+				totalAccounts: user.totalAccounts,
+				totalBudgets: user.totalBudgets,
+				totalGoals: user.totalGoals,
+				recurringTransactions: user.recurringTransactions,
+			},
+		});
+	}
+
+	private async findUserWithToken(sub: string, jti: string) {
 		const [user] = await this.databaseService
 			.select({
 				id: users.id,
@@ -79,30 +109,6 @@ export class AccessStrategy extends PassportStrategy(
 			.innerJoin(tiers, eq(tiers.id, users.tierId))
 			.where(and(eq(users.id, sub), eq(tokens.accessJti, jti)));
 
-		this.logger.debug(
-			`User found: ${user ? JSON.stringify(user) : 'No user found'}`,
-		);
-
-		if (!user) {
-			this.logger.warn(
-				`Access token validation failed for user ID: ${sub}, jti: ${jti}`,
-			);
-			throw new BadRequestException('The credentials provided are not valid.');
-		}
-
-		return new LoggedUserEntity({
-			id: user.id,
-			email: user.email,
-			name: user.name || '',
-			role: user.role.toString() as Role,
-			jti,
-			tier: user.tier,
-			system: {
-				totalAccounts: user.totalAccounts,
-				totalBudgets: user.totalBudgets,
-				totalGoals: user.totalGoals,
-				recurringTransactions: user.recurringTransactions,
-			},
-		});
+		return user;
 	}
 }
