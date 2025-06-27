@@ -348,7 +348,7 @@ export const transactions = pgTable(
 		accountId: uuid('account_id'),
 		categoryId: uuid('category_id'),
 		goalId: uuid('goal_id'),
-		amount: numeric({ precision: 12, scale: 2 }).notNull(),
+		amount: numeric({ precision: 12, scale: 2, mode: 'number' }).notNull(),
 		type: transactionType().notNull(),
 		date: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
 		note: text(),

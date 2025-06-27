@@ -14,12 +14,12 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import { UpdateAccountRequestDto } from 'src/features/accounts/dto/requests/update-account.request.dto';
 import { CreateAccountRequestDto } from './dto/requests/create-account.request.dto';
-import { CreateAccountService } from './servicesa/create-account.service';
-import { DeleteAccountService } from './servicesa/delete-account.service';
-import { GetAccountService } from './servicesa/get-account.service';
-import { UpdateAccountService } from './servicesa/update-account.service';
+import { CreateAccountService } from './services/create-account.service';
+import { DeleteAccountService } from './services/delete-account.service';
+import { GetAccountService } from './services/get-account.service';
+import { UpdateAccountService } from './services/update-account.service';
 import { LoggedUserEntity } from 'src/features/auth/entities/logged-user.entity';
-import { GetAccountsService } from 'src/features/accounts/servicesa/get-accounts.service';
+import { GetAccountsService } from 'src/features/accounts/services/get-accounts.service';
 import { PaginationRequestDto } from 'src/common/requests/pagination.request.dto';
 
 @Controller('accounts')

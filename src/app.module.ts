@@ -8,6 +8,7 @@ import { AuthModule } from './features/auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AccountsModule } from './features/accounts/accounts.module';
 import { CategoriesModule } from './features/categories/categories.module';
+import { TransactionsModule } from './features/transactions/transactions.module';
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import { CategoriesModule } from './features/categories/categories.module';
 		AuthModule,
 		AccountsModule,
 		CategoriesModule,
+		TransactionsModule,
 	],
 	controllers: [],
 	providers: [],
