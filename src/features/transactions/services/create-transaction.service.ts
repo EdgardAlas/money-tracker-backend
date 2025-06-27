@@ -82,6 +82,7 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 		const [transactionCreated] = await this.databaseService
 			.insert(transactions)
 			.values({
+				title: body.title,
 				accountId: body.accountId,
 				categoryId: body.categoryId,
 				date: formatDate(body.date).toDate(),
@@ -128,6 +129,7 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 		const [transactionCreated] = await this.databaseService
 			.insert(transactions)
 			.values({
+				title: body.title,
 				accountId: null,
 				categoryId: body.categoryId,
 				date: formatDate(body.date).toDate(),

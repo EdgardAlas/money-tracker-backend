@@ -1,22 +1,21 @@
+import { relations, SQL, sql } from 'drizzle-orm';
 import {
+	AnyPgColumn,
+	boolean,
+	char,
+	foreignKey,
+	index,
+	integer,
+	interval,
+	numeric,
+	pgEnum,
+	PgSelect,
 	pgTable,
+	text,
+	timestamp,
 	unique,
 	uuid,
-	text,
-	integer,
-	timestamp,
-	index,
-	foreignKey,
-	char,
-	numeric,
-	interval,
-	boolean,
-	pgEnum,
-	AnyPgColumn,
-	PgSelect,
 } from 'drizzle-orm/pg-core';
-import { SQL, sql } from 'drizzle-orm';
-import { relations } from 'drizzle-orm';
 
 export const accountType = pgEnum('account_type', [
 	'bank',
@@ -348,6 +347,7 @@ export const transactions = pgTable(
 		accountId: uuid('account_id'),
 		categoryId: uuid('category_id'),
 		goalId: uuid('goal_id'),
+		title: text().notNull(),
 		amount: numeric({ precision: 12, scale: 2, mode: 'number' }).notNull(),
 		type: transactionType().notNull(),
 		date: timestamp({ withTimezone: true, mode: 'date' }).notNull(),

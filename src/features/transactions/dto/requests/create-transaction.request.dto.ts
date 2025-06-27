@@ -41,4 +41,7 @@ export class CreateTransactionRequestDto {
 	@IsString()
 	@Optional()
 	note?: string;
+
+	@IsString()
+	title: string;
 }
