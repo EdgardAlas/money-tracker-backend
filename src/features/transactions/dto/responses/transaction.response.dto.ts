@@ -13,6 +13,9 @@ export class TransactionResponseDto {
 
 	total: number;
 
+	totalIncome: number;
+	totalExpense: number;
+
 	constructor(props: TransactionResponseDto) {
 		Object.assign(this, props);
 	}

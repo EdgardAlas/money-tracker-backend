@@ -83,9 +83,22 @@ export class GetTransactionsService
 			0,
 		);
 
+		const totalIncome = transactionsResult.reduce(
+			(acc, transaction) => {
+				acc[transaction.type] += transaction.amount;
+				return acc;
+			},
+			{
+				income: 0,
+				expense: 0,
+			},
+		);
+
 		return new TransactionResponseDto({
 			transactions: transactionsResult,
 			total,
+			totalIncome: totalIncome.income,
+			totalExpense: totalIncome.expense,
 		});
 	}
 }
