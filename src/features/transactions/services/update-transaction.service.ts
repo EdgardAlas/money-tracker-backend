@@ -6,24 +6,28 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { BaseService } from 'src/common/base-service';
+import { eq } from 'drizzle-orm';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, transactions } from 'src/database/schema';
-import { CreateTransactionRequestDto } from 'src/features/transactions/dto/requests/create-transaction.request.dto';
+import { UpdateTransactionRequestDto } from 'src/features/transactions/dto/requests/update-transaction.request.dto';
 import { TransactionsHelpersService } from 'src/features/transactions/services/transactions-helpers.service';
 import { formatDate } from 'src/lib/format-dates';
 
 @Injectable()
-export class CreateTransactionService implements BaseService<IdResponseDto> {
-	private logger = new Logger(CreateTransactionService.name);
+export class UpdateTransactionService {
+	private logger = new Logger(UpdateTransactionService.name);
 
 	constructor(
 		@Inject(DatabaseService) private readonly databaseService: DatabaseService,
 		private readonly transactionsHelpersService: TransactionsHelpersService,
 	) {}
 
-	async execute(body: CreateTransactionRequestDto, userId: string) {
+	async execute(
+		transactionId: string,
+		body: UpdateTransactionRequestDto,
+		userId: string,
+	) {
 		if (body.accountId && body.goalId) {
 			this.logger.error(
 				`Both accountId and goalId provided: accountId: ${body.accountId}, goalId: ${body.goalId}`,
@@ -38,33 +42,51 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 			this.logger.log(
 				`Creating transaction for accountId: ${body.accountId}, userId: ${userId}`,
 			);
-			return this.createTransactionIfAccountIsProvided(body, userId);
+			return this.createTransactionIfAccountIsProvided(
+				transactionId,
+				body,
+				userId,
+			);
 		}
 
 		if (body.goalId) {
 			this.logger.log(
 				`Creating transaction for goalId: ${body.goalId}, userId: ${userId}`,
 			);
-			return this.createTransactionIfGoalIsProvided(body, userId);
+			return this.createTransactionIfGoalIsProvided(
+				transactionId,
+				body,
+				userId,
+			);
 		}
-
-		return this.createTransactionIfGoalIsProvided(body, userId);
 	}
 
 	private async createTransactionIfAccountIsProvided(
-		body: CreateTransactionRequestDto,
+		transactionId: string,
+		body: UpdateTransactionRequestDto,
 		userId: string,
 	) {
-		const [accountExists, categoryExists] = await Promise.all([
-			this.transactionsHelpersService.verifyIfAccountExists(
-				body.accountId,
-				userId,
-			),
-			this.transactionsHelpersService.verifyIfCategoryExists(
-				body.categoryId,
-				userId,
-			),
-		]);
+		const [accountExists, categoryExists, transactionExists] =
+			await Promise.all([
+				this.transactionsHelpersService.verifyIfAccountExists(
+					body.accountId,
+					userId,
+				),
+				this.transactionsHelpersService.verifyIfCategoryExists(
+					body.categoryId,
+					userId,
+				),
+				this.transactionsHelpersService.verifyIfTransactionExists(
+					transactionId,
+					userId,
+				),
+			]);
+
+		if (!transactionExists) {
+			throw new NotFoundException(
+				`This transaction does not exist or does not belong to you.`,
+			);
+		}
 
 		if (!accountExists) {
 			throw new NotFoundException(
@@ -78,43 +100,56 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 			);
 		}
 
-		const [transactionCreated] = await this.databaseService
-			.insert(transactions)
-			.values({
+		const [transactionUpdated] = await this.databaseService
+			.update(transactions)
+			.set({
 				title: body.title,
 				accountId: body.accountId,
 				categoryId: body.categoryId,
 				date: formatDate(body.date).toDate(),
 				amount:
-					body.type === 'income'
-						? Math.abs(body.amount)
-						: -Math.abs(body.amount),
+					body.amount !== undefined
+						? body.type === 'income'
+							? Math.abs(body.amount)
+							: -Math.abs(body.amount)
+						: undefined,
 				type: body.type as (typeof transactions.$inferInsert)['type'],
 				note: body.note,
-				userId: userId,
 			})
+			.where(eq(transactions.id, transactionId))
 			.returning({
 				id: accounts.id,
 			});
 
-		if (!transactionCreated) {
-			throw new InternalServerErrorException(`Failed to create transaction`);
+		if (!transactionUpdated) {
+			throw new InternalServerErrorException(`Failed to update transaction`);
 		}
 
-		return new IdResponseDto(transactionCreated.id);
+		return new IdResponseDto(transactionUpdated.id);
 	}
 
 	private async createTransactionIfGoalIsProvided(
-		body: CreateTransactionRequestDto,
+		transactionId: string,
+		body: UpdateTransactionRequestDto,
 		userId: string,
 	) {
-		const [categoryExists, goalExists] = await Promise.all([
+		const [categoryExists, goalExists, transactionExists] = await Promise.all([
 			this.transactionsHelpersService.verifyIfCategoryExists(
 				body.categoryId,
 				userId,
 			),
 			this.transactionsHelpersService.verifyIfGoalExists(body.goalId, userId),
+			this.transactionsHelpersService.verifyIfTransactionExists(
+				transactionId,
+				userId,
+			),
 		]);
+
+		if (!transactionExists) {
+			throw new NotFoundException(
+				`This transaction does not exist or does not belong to you.`,
+			);
+		}
 
 		if (!categoryExists) {
 			throw new NotFoundException(
@@ -128,29 +163,31 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 			);
 		}
 
-		const [transactionCreated] = await this.databaseService
-			.insert(transactions)
-			.values({
+		const [transactionUpdated] = await this.databaseService
+			.update(transactions)
+			.set({
 				title: body.title,
 				goalId: body.goalId,
 				categoryId: body.categoryId,
 				date: formatDate(body.date).toDate(),
 				amount:
-					body.type === 'income'
-						? Math.abs(body.amount)
-						: -Math.abs(body.amount),
+					body.amount !== undefined
+						? body.type === 'income'
+							? Math.abs(body.amount)
+							: -Math.abs(body.amount)
+						: undefined,
 				type: body.type as (typeof transactions.$inferInsert)['type'],
 				note: body.note,
-				userId: userId,
 			})
+			.where(eq(transactions.id, transactionId))
 			.returning({
 				id: accounts.id,
 			});
 
-		if (!transactionCreated) {
-			throw new InternalServerErrorException(`Failed to create transaction`);
+		if (!transactionUpdated) {
+			throw new InternalServerErrorException(`Failed to update transaction`);
 		}
 
-		return new IdResponseDto(transactionCreated.id);
+		return new IdResponseDto(transactionUpdated.id);
 	}
 }

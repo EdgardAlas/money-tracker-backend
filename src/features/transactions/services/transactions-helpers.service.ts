@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull, or } from 'drizzle-orm';
 import { DatabaseService } from 'src/database/database.provider';
-import { accounts, categories, goals } from 'src/database/schema';
+import { accounts, categories, goals, transactions } from 'src/database/schema';
 
 @Injectable()
 export class TransactionsHelpersService {
@@ -53,5 +53,26 @@ export class TransactionsHelpersService {
 			.from(goals)
 			.where(and(eq(goals.id, goalId), eq(goals.userId, userId)));
 		return !!goalExists;
+	}
+
+	async verifyIfTransactionExists(
+		transactionId: string | undefined,
+		userId: string,
+	) {
+		if (!transactionId) {
+			return false;
+		}
+		const [transactionExists] = await this.databaseService
+			.select({
+				id: transactions.id,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.id, transactionId),
+					eq(transactions.userId, userId),
+				),
+			);
+		return !!transactionExists;
 	}
 }
