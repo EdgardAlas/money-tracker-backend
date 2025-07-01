@@ -3,10 +3,11 @@ import { TransactionsController } from './transactions.controller';
 import { CreateTransactionService } from './services/create-transaction.service';
 import { DatabaseModule } from 'src/database/database.module';
 import { GetTransactionsService } from './services/get-transactions.service';
+import { TransactionsHelpersService } from './services/transactions-helpers.service';
 
 @Module({
 	imports: [DatabaseModule],
 	controllers: [TransactionsController],
-	providers: [CreateTransactionService, GetTransactionsService],
+	providers: [CreateTransactionService, GetTransactionsService, TransactionsHelpersService],
 })
 export class TransactionsModule {}

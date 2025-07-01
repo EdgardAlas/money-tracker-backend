@@ -6,12 +6,12 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { and, eq, isNull, or } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
-import { accounts, categories, transactions } from 'src/database/schema';
+import { accounts, transactions } from 'src/database/schema';
 import { CreateTransactionRequestDto } from 'src/features/transactions/dto/requests/create-transaction.request.dto';
+import { TransactionsHelpersService } from 'src/features/transactions/services/transactions-helpers.service';
 import { formatDate } from 'src/lib/format-dates';
 
 @Injectable()
@@ -20,6 +20,7 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 
 	constructor(
 		@Inject(DatabaseService) private readonly databaseService: DatabaseService,
+		private readonly transactionsHelpersService: TransactionsHelpersService,
 	) {}
 
 	async execute(body: CreateTransactionRequestDto, userId: string) {
@@ -55,16 +56,14 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 		userId: string,
 	) {
 		const [accountExists, categoryExists] = await Promise.all([
-			this.databaseService
-				.select({
-					id: accounts.id,
-				})
-				.from(accounts)
-				.where(
-					and(eq(accounts.id, body.accountId), eq(accounts.userId, userId)),
-				)
-				.then((results) => results[0]),
-			this.verifyIfCategoryExists(body, userId),
+			this.transactionsHelpersService.verifyIfAccountExists(
+				body.accountId,
+				userId,
+			),
+			this.transactionsHelpersService.verifyIfCategoryExists(
+				body.categoryId,
+				userId,
+			),
 		]);
 
 		if (!accountExists) {
@@ -109,20 +108,23 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 		body: CreateTransactionRequestDto,
 		userId: string,
 	) {
-		const [categoryExists] = await Promise.all([
-			this.verifyIfCategoryExists(body, userId),
-			this.databaseService
-				.select({
-					id: accounts.id,
-				})
-				.from(accounts)
-				.where(and(eq(accounts.id, body.goalId), eq(accounts.userId, userId)))
-				.then((results) => results[0]),
+		const [categoryExists, goalExists] = await Promise.all([
+			this.transactionsHelpersService.verifyIfCategoryExists(
+				body.categoryId,
+				userId,
+			),
+			this.transactionsHelpersService.verifyIfGoalExists(body.goalId, userId),
 		]);
 
 		if (!categoryExists) {
 			throw new NotFoundException(
 				`This category does not exist or does not belong to you.`,
+			);
+		}
+
+		if (!goalExists) {
+			throw new NotFoundException(
+				`This goal does not exist or does not belong to you.`,
 			);
 		}
 
@@ -150,37 +152,5 @@ export class CreateTransactionService implements BaseService<IdResponseDto> {
 		}
 
 		return new IdResponseDto(transactionCreated.id);
-	}
-
-	private async verifyIfCategoryExists(
-		body: CreateTransactionRequestDto,
-		userId: string,
-	) {
-		if (!body.categoryId) {
-			return true;
-		}
-
-		const [categoryExists] = await this.databaseService
-			.select({
-				id: categories.id,
-			})
-			.from(categories)
-			.where(
-				or(
-					and(
-						eq(categories.id, body.categoryId),
-						eq(categories.userId, userId),
-					),
-					isNull(categories.userId),
-				),
-			);
-
-		if (!categoryExists) {
-			throw new NotFoundException(
-				`This category does not exist or does not belong to you.`,
-			);
-		}
-
-		return !!categoryExists;
 	}
 }
