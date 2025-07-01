@@ -19,7 +19,7 @@ export class TransactionsController {
 		@User('id') userId: string,
 		@Query() query: GetTransactionsRequestDto,
 	) {
-		return this.getTransactionsService.getTransactions(query, userId);
+		return this.getTransactionsService.execute(query, userId);
 	}
 
 	@Post()
