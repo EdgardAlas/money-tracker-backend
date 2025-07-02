@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, isNull, or } from 'drizzle-orm';
+import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, categories, goals, transactions } from 'src/database/schema';
 
@@ -74,5 +74,54 @@ export class TransactionsHelpersService {
 				),
 			);
 		return !!transactionExists;
+	}
+
+	balanceQueries(userId: string) {
+		const balanceQuery = this.databaseService
+			.select({
+				amout: sql<number>`SUM(${transactions.amount})`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.accountId, accounts.id),
+					eq(transactions.userId, userId),
+				),
+			)
+			.as('balance');
+
+		const incomeQuery = this.databaseService
+			.select({
+				amount: sql<number>`SUM(${transactions.amount})`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.accountId, accounts.id),
+					eq(transactions.userId, userId),
+					eq(transactions.type, 'income'),
+				),
+			)
+			.as('income');
+
+		const expenseQuery = this.databaseService
+			.select({
+				amount: sql<number>`SUM(${transactions.amount})`,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.accountId, accounts.id),
+					eq(transactions.userId, userId),
+					eq(transactions.type, 'expense'),
+				),
+			)
+			.as('expense');
+
+		return {
+			balanceQuery,
+			incomeQuery,
+			expenseQuery,
+		};
 	}
 }

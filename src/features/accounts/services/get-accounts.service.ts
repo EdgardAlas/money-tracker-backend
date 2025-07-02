@@ -6,6 +6,7 @@ import { PaginationResponseDto } from 'src/common/responses/pagination.response.
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, withPagination } from 'src/database/schema';
 import { AccountResponseDto } from 'src/features/accounts/dto/responses/account.response.dto';
+import { TransactionsHelpersService } from 'src/features/transactions/services/transactions-helpers.service';
 
 @Injectable()
 export class GetAccountsService
@@ -13,6 +14,7 @@ export class GetAccountsService
 {
 	constructor(
 		@Inject(DatabaseService) private readonly databaseService: DatabaseService,
+		private readonly transactionsHelpersService: TransactionsHelpersService,
 	) {}
 
 	async execute(query: PaginationRequestDto, userId: string) {
@@ -30,6 +32,9 @@ export class GetAccountsService
 					id: account.id,
 					name: account.name,
 					type: account.type as string,
+					balance: account.balance,
+					income: account.income,
+					expense: account.expense,
 				});
 			}),
 			currentPage: query.page,
@@ -40,11 +45,17 @@ export class GetAccountsService
 	}
 
 	private buildAccountsQuery(search: string, userId: string) {
+		const { balanceQuery, expenseQuery, incomeQuery } =
+			this.transactionsHelpersService.balanceQueries(userId);
+
 		return this.databaseService
 			.select({
 				id: accounts.id,
 				name: accounts.name,
 				type: accounts.type,
+				balance: balanceQuery.amout,
+				income: incomeQuery.amount,
+				expense: expenseQuery.amount,
 			})
 			.from(accounts)
 			.where(
