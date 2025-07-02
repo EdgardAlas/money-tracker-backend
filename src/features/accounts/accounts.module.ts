@@ -6,9 +6,10 @@ import { DeleteAccountService } from './services/delete-account.service';
 import { GetAccountService } from './services/get-account.service';
 import { UpdateAccountService } from './services/update-account.service';
 import { GetAccountsService } from './services/get-accounts.service';
+import { TransactionsModule } from 'src/features/transactions/transactions.module';
 
 @Module({
-	imports: [DatabaseModule],
+	imports: [DatabaseModule, TransactionsModule],
 	controllers: [AccountsController],
 	providers: [
 		CreateAccountService,

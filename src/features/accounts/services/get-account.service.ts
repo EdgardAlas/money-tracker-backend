@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts } from 'src/database/schema';
@@ -27,9 +27,9 @@ export class GetAccountService implements BaseService<AccountResponseDto> {
 				id: accounts.id,
 				name: accounts.name,
 				type: accounts.type,
-				balance: balanceQuery.amout,
-				income: incomeQuery.amount,
-				expense: expenseQuery.amount,
+				balance: sql<number>`${balanceQuery}`.mapWith(Number),
+				income: sql<number>`${incomeQuery}`.mapWith(Number),
+				expense: sql<number>`${expenseQuery}`.mapWith(Number),
 			})
 			.from(accounts)
 			.where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));

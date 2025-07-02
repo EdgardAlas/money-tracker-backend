@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, ilike } from 'drizzle-orm';
+import { and, eq, ilike, sql } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { PaginationRequestDto } from 'src/common/requests/pagination.request.dto';
 import { PaginationResponseDto } from 'src/common/responses/pagination.response.dto';
@@ -53,9 +53,9 @@ export class GetAccountsService
 				id: accounts.id,
 				name: accounts.name,
 				type: accounts.type,
-				balance: balanceQuery.amout,
-				income: incomeQuery.amount,
-				expense: expenseQuery.amount,
+				balance: sql<number>`${balanceQuery}`.mapWith(Number),
+				income: sql<number>`${incomeQuery}`.mapWith(Number),
+				expense: sql<number>`${expenseQuery}`.mapWith(Number),
 			})
 			.from(accounts)
 			.where(

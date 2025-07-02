@@ -79,7 +79,9 @@ export class TransactionsHelpersService {
 	balanceQueries(userId: string) {
 		const balanceQuery = this.databaseService
 			.select({
-				amout: sql<number>`SUM(${transactions.amount})`,
+				balance: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+					.mapWith(Number)
+					.as('balance'),
 			})
 			.from(transactions)
 			.where(
@@ -92,7 +94,9 @@ export class TransactionsHelpersService {
 
 		const incomeQuery = this.databaseService
 			.select({
-				amount: sql<number>`SUM(${transactions.amount})`,
+				income: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+					.mapWith(Number)
+					.as('income'),
 			})
 			.from(transactions)
 			.where(
@@ -106,7 +110,9 @@ export class TransactionsHelpersService {
 
 		const expenseQuery = this.databaseService
 			.select({
-				amount: sql<number>`SUM(${transactions.amount})`,
+				expense: sql<number>`ABS(COALESCE(SUM(${transactions.amount}), 0))`
+					.mapWith(Number)
+					.as('expense'),
 			})
 			.from(transactions)
 			.where(

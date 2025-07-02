@@ -9,6 +9,12 @@ import { UpdateTransactionService } from './services/update-transaction.service'
 @Module({
 	imports: [DatabaseModule],
 	controllers: [TransactionsController],
-	providers: [CreateTransactionService, GetTransactionsService, TransactionsHelpersService, UpdateTransactionService],
+	providers: [
+		CreateTransactionService,
+		GetTransactionsService,
+		TransactionsHelpersService,
+		UpdateTransactionService,
+	],
+	exports: [TransactionsHelpersService],
 })
 export class TransactionsModule {}
