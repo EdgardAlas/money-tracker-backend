@@ -14,6 +14,7 @@ import { CreateTransactionRequestDto } from 'src/features/transactions/dto/reque
 import { GetTransactionsRequestDto } from 'src/features/transactions/dto/requests/get-transactions.request.dto';
 import { CreateTransactionService } from 'src/features/transactions/services/create-transaction.service';
 import { DeleteTransactionService } from 'src/features/transactions/services/delete-transaction.service';
+import { GetTransactionService } from 'src/features/transactions/services/get-transaction.service';
 import { GetTransactionsService } from 'src/features/transactions/services/get-transactions.service';
 import { UpdateTransactionService } from 'src/features/transactions/services/update-transaction.service';
 
@@ -25,6 +26,7 @@ export class TransactionsController {
 		private readonly updateTransactionService: UpdateTransactionService,
 		private readonly getTransactionsService: GetTransactionsService,
 		private readonly deleteTransactionService: DeleteTransactionService,
+		private readonly getTransactionService: GetTransactionService,
 	) {}
 
 	@Get()
@@ -33,6 +35,14 @@ export class TransactionsController {
 		@Query() query: GetTransactionsRequestDto,
 	) {
 		return this.getTransactionsService.execute(query, userId);
+	}
+
+	@Get(':transactionId')
+	getTransaction(
+		@User('id') userId: string,
+		@Param('transactionId') transactionId: string,
+	) {
+		return this.getTransactionService.execute(transactionId, userId);
 	}
 
 	@Post()

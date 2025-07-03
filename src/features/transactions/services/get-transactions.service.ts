@@ -4,12 +4,12 @@ import { BaseService } from 'src/common/base-service';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, categories, goals, transactions } from 'src/database/schema';
 import { GetTransactionsRequestDto } from 'src/features/transactions/dto/requests/get-transactions.request.dto';
-import { TransactionResponseDto } from 'src/features/transactions/dto/responses/transaction.response.dto';
+import { TransactionsResponseDto } from 'src/features/transactions/dto/responses/transactions.response.dto';
 import { formatDate } from 'src/lib/format-dates';
 
 @Injectable()
 export class GetTransactionsService
-	implements BaseService<TransactionResponseDto>
+	implements BaseService<TransactionsResponseDto>
 {
 	constructor(
 		@Inject(DatabaseService) private readonly databaseService: DatabaseService,
@@ -94,7 +94,7 @@ export class GetTransactionsService
 			},
 		);
 
-		return new TransactionResponseDto({
+		return new TransactionsResponseDto({
 			transactions: transactionsResult,
 			total,
 			totalIncome: totalIncome.income,
