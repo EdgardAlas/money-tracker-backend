@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	Param,
 	Patch,
@@ -12,6 +13,7 @@ import { User } from 'src/common/decorators/user.decorator';
 import { CreateTransactionRequestDto } from 'src/features/transactions/dto/requests/create-transaction.request.dto';
 import { GetTransactionsRequestDto } from 'src/features/transactions/dto/requests/get-transactions.request.dto';
 import { CreateTransactionService } from 'src/features/transactions/services/create-transaction.service';
+import { DeleteTransactionService } from 'src/features/transactions/services/delete-transaction.service';
 import { GetTransactionsService } from 'src/features/transactions/services/get-transactions.service';
 import { UpdateTransactionService } from 'src/features/transactions/services/update-transaction.service';
 
@@ -22,10 +24,11 @@ export class TransactionsController {
 		private readonly createTransactionService: CreateTransactionService,
 		private readonly updateTransactionService: UpdateTransactionService,
 		private readonly getTransactionsService: GetTransactionsService,
+		private readonly deleteTransactionService: DeleteTransactionService,
 	) {}
 
 	@Get()
-	async getTransactions(
+	getTransactions(
 		@User('id') userId: string,
 		@Query() query: GetTransactionsRequestDto,
 	) {
@@ -33,7 +36,7 @@ export class TransactionsController {
 	}
 
 	@Post()
-	async createTransaction(
+	createTransaction(
 		@Body() body: CreateTransactionRequestDto,
 		@User('id') userId: string,
 	) {
@@ -41,11 +44,19 @@ export class TransactionsController {
 	}
 
 	@Patch(':transactionId')
-	async updateTransaction(
+	updateTransaction(
 		@User('id') userId: string,
 		@Body() body: CreateTransactionRequestDto,
 		@Param('transactionId') transactionId: string,
 	) {
 		return this.updateTransactionService.execute(transactionId, body, userId);
+	}
+
+	@Delete(':transactionId')
+	deleteTransaction(
+		@User('id') userId: string,
+		@Param('transactionId') transactionId: string,
+	) {
+		return this.deleteTransactionService.execute(transactionId, userId);
 	}
 }

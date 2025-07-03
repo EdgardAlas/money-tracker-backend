@@ -5,6 +5,7 @@ import { DatabaseModule } from 'src/database/database.module';
 import { GetTransactionsService } from './services/get-transactions.service';
 import { TransactionsHelpersService } from './services/transactions-helpers.service';
 import { UpdateTransactionService } from './services/update-transaction.service';
+import { DeleteTransactionService } from './services/delete-transaction.service';
 
 @Module({
 	imports: [DatabaseModule],
@@ -14,6 +15,7 @@ import { UpdateTransactionService } from './services/update-transaction.service'
 		GetTransactionsService,
 		TransactionsHelpersService,
 		UpdateTransactionService,
+		DeleteTransactionService,
 	],
 	exports: [TransactionsHelpersService],
 })

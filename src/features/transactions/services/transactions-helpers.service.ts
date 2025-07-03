@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, categories, goals, transactions } from 'src/database/schema';
@@ -53,6 +53,35 @@ export class TransactionsHelpersService {
 			.from(goals)
 			.where(and(eq(goals.id, goalId), eq(goals.userId, userId)));
 		return !!goalExists;
+	}
+
+	async verifyIfTransactionBelongsToUser(
+		transactionId: string | undefined,
+		userId: string,
+	) {
+		if (!transactionId) {
+			return false;
+		}
+
+		const [transactionExists] = await this.databaseService
+			.select({
+				id: transactions.id,
+			})
+			.from(transactions)
+			.where(
+				and(
+					eq(transactions.id, transactionId),
+					eq(transactions.userId, userId),
+				),
+			);
+
+		if (!transactionExists) {
+			throw new NotFoundException(
+				"This transaction doesn't exist or you don't have permission to access it.",
+			);
+		}
+
+		return !!transactionExists;
 	}
 
 	async verifyIfTransactionExists(
