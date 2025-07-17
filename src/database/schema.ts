@@ -312,6 +312,7 @@ export const goals = pgTable(
 		targetAmount: numeric('target_amount', {
 			precision: 12,
 			scale: 2,
+			mode: 'number',
 		}).notNull(),
 		dueDate: timestamp('due_date', { withTimezone: true, mode: 'date' }),
 		createdAt: timestamp('created_at', {

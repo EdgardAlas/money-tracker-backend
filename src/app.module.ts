@@ -9,6 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AccountsModule } from './features/accounts/accounts.module';
 import { CategoriesModule } from './features/categories/categories.module';
 import { TransactionsModule } from './features/transactions/transactions.module';
+import { GoalsModule } from './features/goals/goals.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { TransactionsModule } from './features/transactions/transactions.module'
 		AccountsModule,
 		CategoriesModule,
 		TransactionsModule,
+		GoalsModule,
 	],
 	controllers: [],
 	providers: [],
