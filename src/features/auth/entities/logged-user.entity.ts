@@ -13,7 +13,7 @@ export class LoggedUserEntity {
 	public role: Role;
 	public jti: string;
 
-	public tier: {
+	public limits: {
 		maxBudgets: number;
 		maxAccounts: number;
 		maxGoals: number;

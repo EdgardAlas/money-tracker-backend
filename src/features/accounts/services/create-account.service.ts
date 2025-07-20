@@ -24,7 +24,7 @@ export class CreateAccountService implements BaseService<IdResponseDto> {
 
 	async execute(body: CreateAccountRequestDto, user: LoggedUserEntity) {
 		verifyLimits({
-			max: user.tier.maxAccounts,
+			max: user.limits.maxAccounts,
 			current: user.system.totalAccounts,
 			isAllowedMessage:
 				'You have reached the maximum number of accounts allowed for your tier.',

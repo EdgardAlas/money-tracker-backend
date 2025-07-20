@@ -68,7 +68,7 @@ export class AccessStrategy extends PassportStrategy(
 			name: user.name || '',
 			role: user.role.toString() as Role,
 			jti,
-			tier: user.tier,
+			limits: user.tier,
 			system: user.system,
 		});
 	}

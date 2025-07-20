@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from 'src/common/decorators/user.decorator';
+import { LoggedUserEntity } from 'src/features/auth/entities/logged-user.entity';
 import { CreateGoalRequestDto } from 'src/features/goals/dto/request/create-goal.request.dto';
 import { CreateGoalsService } from 'src/features/goals/services/create-goals.service';
 import { GetGoalsService } from 'src/features/goals/services/get-goals.service';
@@ -19,7 +20,10 @@ export class GoalsController {
 	}
 
 	@Post()
-	createGoal(@User('id') userId: string, @Body() body: CreateGoalRequestDto) {
+	createGoal(
+		@User() userId: LoggedUserEntity,
+		@Body() body: CreateGoalRequestDto,
+	) {
 		return this.createGoalsService.execute(body, userId);
 	}
 }

@@ -25,7 +25,7 @@ export class CreateGoalsService implements BaseService<IdResponseDto> {
 
 	async execute(body: CreateGoalRequestDto, user: LoggedUserEntity) {
 		verifyLimits({
-			max: user.tier.maxGoals,
+			max: user.limits.maxGoals,
 			current: user.system.totalGoals,
 			isAllowedMessage:
 				'You have reached the maximum number of goals allowed for your tier.',
