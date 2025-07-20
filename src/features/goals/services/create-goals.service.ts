@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
+import { verifyLimits } from 'src/common/helpers/verify-limits';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
 import { goals, lower } from 'src/database/schema';
@@ -23,7 +24,13 @@ export class CreateGoalsService implements BaseService<IdResponseDto> {
 	) {}
 
 	async execute(body: CreateGoalRequestDto, user: LoggedUserEntity) {
-		this.ensureUserCanCreateGoal(user);
+		verifyLimits({
+			max: user.tier.maxGoals,
+			current: user.system.totalGoals,
+			isAllowedMessage:
+				'You have reached the maximum number of goals allowed for your tier.',
+			notAllowedMessage: 'You cannot create more goals at this time.',
+		});
 
 		await this.goalExists(body.name, user.id);
 
@@ -57,17 +64,6 @@ export class CreateGoalsService implements BaseService<IdResponseDto> {
 
 		if (existingGoal) {
 			throw new ConflictException(`Goal with this name already exists`);
-		}
-	}
-
-	private ensureUserCanCreateGoal(user: LoggedUserEntity) {
-		if (user.tier.maxGoals <= user.system.totalGoals) {
-			this.logger.warn(
-				`User with ID ${user.id} has reached the maximum number of goals allowed by their tier.`,
-			);
-			throw new ConflictException(
-				'You have reached the maximum number of goals allowed by your tier.',
-			);
 		}
 	}
 }

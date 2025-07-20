@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
+import { verifyLimits } from 'src/common/helpers/verify-limits';
 import { IdResponseDto } from 'src/common/responses/id.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, lower } from 'src/database/schema';
@@ -22,7 +23,13 @@ export class CreateAccountService implements BaseService<IdResponseDto> {
 	) {}
 
 	async execute(body: CreateAccountRequestDto, user: LoggedUserEntity) {
-		this.ensureUserCanCreateAccount(user);
+		verifyLimits({
+			max: user.tier.maxAccounts,
+			current: user.system.totalAccounts,
+			isAllowedMessage:
+				'You have reached the maximum number of accounts allowed for your tier.',
+			notAllowedMessage: 'You cannot create more accounts at this time.',
+		});
 
 		await this.ensureAccountNameIsUnique(body.name, user);
 
@@ -47,17 +54,6 @@ export class CreateAccountService implements BaseService<IdResponseDto> {
 		}
 
 		return new IdResponseDto(accountCreated.id);
-	}
-
-	private ensureUserCanCreateAccount(user: LoggedUserEntity) {
-		if (user.tier.maxAccounts <= user.system.totalAccounts) {
-			this.logger.warn(
-				`User with ID ${user.id} has reached the maximum number of accounts allowed by their tier.`,
-			);
-			throw new ConflictException(
-				'You have reached the maximum number of accounts allowed by your tier.',
-			);
-		}
 	}
 
 	private async ensureAccountNameIsUnique(
