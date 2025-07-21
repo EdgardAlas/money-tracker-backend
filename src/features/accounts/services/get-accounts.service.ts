@@ -4,7 +4,7 @@ import { BaseService } from 'src/common/base-service';
 import { PaginationRequestDto } from 'src/common/requests/pagination.request.dto';
 import { PaginationResponseDto } from 'src/common/responses/pagination.response.dto';
 import { DatabaseService } from 'src/database/database.provider';
-import { accounts, withPagination } from 'src/database/schema';
+import { accounts, transactions, withPagination } from 'src/database/schema';
 import { AccountResponseDto } from 'src/features/accounts/dto/responses/account.response.dto';
 import { TransactionsHelpersService } from 'src/features/transactions/services/transactions-helpers.service';
 
@@ -45,22 +45,29 @@ export class GetAccountsService
 	}
 
 	private buildAccountsQuery(search: string, userId: string) {
-		const { balanceQuery, expenseQuery, incomeQuery } =
-			this.transactionsHelpersService.balanceQueries(userId);
-
 		return this.databaseService
 			.select({
 				id: accounts.id,
 				name: accounts.name,
 				type: accounts.type,
-				balance: sql<number>`${balanceQuery}`.mapWith(Number),
-				income: sql<number>`${incomeQuery}`.mapWith(Number),
-				expense: sql<number>`${expenseQuery}`.mapWith(Number),
+				balance: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`.mapWith(
+					Number,
+				),
+				income:
+					sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'income' THEN ${transactions.amount} ELSE 0 END), 0)`.mapWith(
+						Number,
+					),
+				expense:
+					sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'expense' THEN ${transactions.amount} ELSE 0 END), 0)`.mapWith(
+						Number,
+					),
 			})
 			.from(accounts)
+			.leftJoin(transactions, eq(transactions.accountId, accounts.id))
 			.where(
 				and(ilike(accounts.name, `%${search}%`), eq(accounts.userId, userId)),
-			);
+			)
+			.groupBy(accounts.id, accounts.name, accounts.type, accounts.userId);
 	}
 
 	private getTotalCount(search: string, userId: string) {

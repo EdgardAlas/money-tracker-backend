@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { DatabaseService } from 'src/database/database.provider';
-import { accounts } from 'src/database/schema';
+import { accounts, transactions } from 'src/database/schema';
 import { AccountResponseDto } from 'src/features/accounts/dto/responses/account.response.dto';
 import { TransactionsHelpersService } from 'src/features/transactions/services/transactions-helpers.service';
 
@@ -19,20 +19,25 @@ export class GetAccountService implements BaseService<AccountResponseDto> {
 		accountId: string,
 		userId: string,
 	): Promise<AccountResponseDto> {
-		const { balanceQuery, expenseQuery, incomeQuery } =
-			this.transactionsHelpersService.balanceQueries(userId);
-
 		const [account] = await this.databaseService
 			.select({
 				id: accounts.id,
 				name: accounts.name,
 				type: accounts.type,
-				balance: sql<number>`${balanceQuery}`.mapWith(Number),
-				income: sql<number>`${incomeQuery}`.mapWith(Number),
-				expense: sql<number>`${expenseQuery}`.mapWith(Number),
+				balance: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`.mapWith(
+					Number,
+				),
+				income: sql<number | null>`
+					SUM(CASE WHEN ${transactions.type} = 'income' THEN ${transactions.amount} ELSE 0 END)
+				`.mapWith(Number),
+				expense: sql<number | null>`
+					SUM(CASE WHEN ${transactions.type} = 'expense' THEN ${transactions.amount} ELSE 0 END)
+				`.mapWith(Number),
 			})
 			.from(accounts)
-			.where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
+			.leftJoin(transactions, eq(transactions.accountId, accounts.id))
+			.where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)))
+			.groupBy(accounts.id, accounts.name, accounts.type, accounts.userId);
 
 		if (!account) {
 			this.logger.warn(

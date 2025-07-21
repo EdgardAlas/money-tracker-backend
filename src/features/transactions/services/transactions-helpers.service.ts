@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, or } from 'drizzle-orm';
 import { DatabaseService } from 'src/database/database.provider';
 import { accounts, categories, goals, transactions } from 'src/database/schema';
 
@@ -103,60 +103,5 @@ export class TransactionsHelpersService {
 				),
 			);
 		return !!transactionExists;
-	}
-
-	balanceQueries(userId: string) {
-		const balanceQuery = this.databaseService
-			.select({
-				balance: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
-					.mapWith(Number)
-					.as('balance'),
-			})
-			.from(transactions)
-			.where(
-				and(
-					eq(transactions.accountId, accounts.id),
-					eq(transactions.userId, userId),
-				),
-			)
-			.as('balance');
-
-		const incomeQuery = this.databaseService
-			.select({
-				income: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
-					.mapWith(Number)
-					.as('income'),
-			})
-			.from(transactions)
-			.where(
-				and(
-					eq(transactions.accountId, accounts.id),
-					eq(transactions.userId, userId),
-					eq(transactions.type, 'income'),
-				),
-			)
-			.as('income');
-
-		const expenseQuery = this.databaseService
-			.select({
-				expense: sql<number>`ABS(COALESCE(SUM(${transactions.amount}), 0))`
-					.mapWith(Number)
-					.as('expense'),
-			})
-			.from(transactions)
-			.where(
-				and(
-					eq(transactions.accountId, accounts.id),
-					eq(transactions.userId, userId),
-					eq(transactions.type, 'expense'),
-				),
-			)
-			.as('expense');
-
-		return {
-			balanceQuery,
-			incomeQuery,
-			expenseQuery,
-		};
 	}
 }
