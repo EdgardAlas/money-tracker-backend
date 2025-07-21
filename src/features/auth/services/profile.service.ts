@@ -11,6 +11,7 @@ export class ProfileService implements BaseService<ProfileResponseDto> {
 			id: user.id,
 			name: user.name,
 			type: user.role,
+			timezone: user.timezone,
 		});
 	}
 }

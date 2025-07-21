@@ -70,6 +70,7 @@ export class AccessStrategy extends PassportStrategy(
 			jti,
 			limits: user.tier,
 			system: user.system,
+			timezone: user.timezone || 'UTC',
 		});
 	}
 
@@ -80,6 +81,7 @@ export class AccessStrategy extends PassportStrategy(
 				email: users.email,
 				name: users.name,
 				role: users.role,
+				timezone: users.timezone,
 				tier: {
 					maxBudgets: tiers.maxBudgets,
 					maxAccounts: tiers.maxAccounts,

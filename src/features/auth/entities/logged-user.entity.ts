@@ -12,6 +12,7 @@ export class LoggedUserEntity {
 	public name: string;
 	public role: Role;
 	public jti: string;
+	public timezone: string;
 
 	public limits: {
 		maxBudgets: number;

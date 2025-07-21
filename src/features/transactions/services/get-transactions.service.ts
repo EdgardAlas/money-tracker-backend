@@ -1,8 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, between, eq, gte, ilike, or, SQL } from 'drizzle-orm';
+import { and, between, eq, gte, ilike, or, sql, SQL } from 'drizzle-orm';
 import { BaseService } from 'src/common/base-service';
 import { DatabaseService } from 'src/database/database.provider';
-import { accounts, categories, goals, transactions } from 'src/database/schema';
+import {
+	accounts,
+	categories,
+	goals,
+	transactions,
+	users,
+} from 'src/database/schema';
 import { GetTransactionsRequestDto } from 'src/features/transactions/dto/requests/get-transactions.request.dto';
 import { TransactionsResponseDto } from 'src/features/transactions/dto/responses/transactions.response.dto';
 import { formatDate } from 'src/lib/format-dates';
@@ -56,7 +62,7 @@ export class GetTransactionsService
 				goal: goals.name,
 				amount: transactions.amount,
 				type: transactions.type,
-				date: transactions.date,
+				date: sql<Date>`(${transactions.date} AT TIME ZONE 'UTC' AT TIME ZONE ${users.timezone})`,
 				note: transactions.note,
 				title: transactions.title,
 			})
@@ -64,11 +70,12 @@ export class GetTransactionsService
 			.leftJoin(categories, eq(transactions.categoryId, categories.id))
 			.leftJoin(accounts, eq(transactions.accountId, accounts.id))
 			.leftJoin(goals, eq(transactions.goalId, goals.id))
+			.innerJoin(users, eq(transactions.userId, users.id))
 			.where(
 				and(
 					eq(transactions.userId, userId),
-					...filters,
-					query.category.length > 0
+					/* 		...filters, */
+					query.category?.length > 0
 						? or(
 								...query.category.map((category) =>
 									ilike(categories.name, `%${category}%`),
