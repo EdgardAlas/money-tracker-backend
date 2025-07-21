@@ -74,7 +74,7 @@ export class GetTransactionsService
 			.where(
 				and(
 					eq(transactions.userId, userId),
-					/* 		...filters, */
+					...filters,
 					query.category?.length > 0
 						? or(
 								...query.category.map((category) =>
